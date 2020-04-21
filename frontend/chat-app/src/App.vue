@@ -8,7 +8,7 @@
           class="tab"
           :class="{ 'active' : activeTab === 'participants' }"
           @click="setActiveTab('participants')"
-        >Participants</li>
+        >Participants ({{ participants.length }})</li>
         <li
           class="tab"
           :class="{ 'active' : activeTab === 'chat' }"
@@ -46,7 +46,8 @@ export default {
       messages: [],
       userIsLoggedIn: false,
       userName: "",
-      activeTab: "chat"
+      activeTab: "chat",
+      participants: [],
     };
   },
 
@@ -81,7 +82,7 @@ export default {
 
     registerUser() {
       let message = {
-        userName: "Meetingbot",
+        userName: this.userName,
         timeStamp: moment(),
         message: `${this.userName} joined.`,
         type: "user-connection"
@@ -90,16 +91,17 @@ export default {
       this.ws.send(JSON.stringify(message));
       this.addNewMessage(message);
       this.userIsLoggedIn = true;
-    }
+    },
   },
 
   mounted() {
     this.createWebSocket();
+
     this.ws.onopen = () => {
       // connection opened
       console.log("a client has connected");
     };
-
+    
     this.ws.onmessage = e => {
       // got a new message
       console.log("got message ", e);
@@ -110,6 +112,12 @@ export default {
       console.log("a client has disconnected");
       // create a WebSocket
       this.createWebSocket();
+    };
+  },
+
+  destroyed() {
+    this.ws.onclose = () => {
+      console.log("a client has disconnected");
     };
   }
 };
