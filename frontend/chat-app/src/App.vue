@@ -1,15 +1,39 @@
 <template>
   <div id="app">
-    <input type="text" v-model="userName" />
-    <button @click="registerUser">Ok</button>
-    <Participants />
-    <Chat :messages="messages" @messageSent="sendMessage" />
+    <header>
+      <p>Status Meeting Standup</p>
+
+      <ul id="tabs" class="tabs">
+        <li
+          class="tab"
+          :class="{ 'active' : activeTab === 'participants' }"
+          @click="setActiveTab('participants')"
+        >Participants</li>
+        <li
+          class="tab"
+          :class="{ 'active' : activeTab === 'chat' }"
+          @click="setActiveTab('chat')"
+        >Chat</li>
+      </ul>
+    </header>
+
+    <div id="wrapper">
+      <div v-if="userIsLoggedIn">
+        <!--<Participants />-->
+        <Chat :messages="messages" @messageSent="sendMessage" />
+      </div>
+
+      <div v-else>
+        <input type="text" v-model="userName" />
+        <button @click="registerUser">Ok</button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import Chat from "./components/Chat";
-import Participants from "./components/Participants";
+//import Participants from "./components/Participants";
 
 import moment from "moment";
 
@@ -20,19 +44,25 @@ export default {
     return {
       ws: null,
       messages: [],
-      userName: ""
+      userIsLoggedIn: false,
+      userName: "",
+      activeTab: "chat"
     };
   },
 
   components: {
-    Chat,
-    Participants
+    Chat
+    //Participants
   },
 
   methods: {
     createWebSocket() {
       const URL = "ws://localhost:3001";
       this.ws = new WebSocket(URL);
+    },
+
+    setActiveTab(t) {
+      this.activeTab = t;
     },
 
     addNewMessage(m) {
@@ -51,14 +81,15 @@ export default {
 
     registerUser() {
       let message = {
-        userName: 'Meetingbot',
+        userName: "Meetingbot",
         timeStamp: moment(),
-        message: `${this.userName} joined`,
+        message: `${this.userName} joined.`,
         type: "user-connection"
       };
 
       this.ws.send(JSON.stringify(message));
       this.addNewMessage(message);
+      this.userIsLoggedIn = true;
     }
   },
 
@@ -85,18 +116,90 @@ export default {
 </script>
 
 <style lang="scss">
+@import "./settings.scss";
+
+body,
+html {
+  margin: 0;
+}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
 }
 
-$secondary: #545454;
+$border-radius: 0.4rem;
 
-.text-secondary {
-  color: $secondary;
+.text-gray {
+  color: $gray;
+}
+
+// styling the markup
+header {
+  background: $light-gray;
+  position: fixed;
+  top: 0;
+  z-index: 1;
+  width: 100%;
+
+  p {
+    margin: 0;
+    padding: 1rem;
+  }
+}
+
+.tabs {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding-left: 0;
+  margin: 0;
+
+  .tab {
+    display: flex;
+    flex: 0 0 50%;
+    justify-content: center;
+    padding: 1rem 0;
+    border: 1px solid transparent;
+    border-bottom: 1px solid #e3e4e6;
+    cursor: pointer;
+  }
+
+  .tab:first-child {
+    border-top-right-radius: $border-radius;
+  }
+
+  .tab:last-child {
+    border-top-left-radius: $border-radius;
+  }
+
+  .tab.active {
+    background: white;
+    border: 1px solid #e3e4e6;
+    border-bottom: 1px solid transparent;
+  }
+}
+
+#wrapper {
+  position: relative;
+  margin-top: 109px;
+  padding: 1rem;
+}
+
+input {
+  display: block;
+  height: calc(1.5em + 0.75rem + 2px);
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  border: 1px solid #ced4da;
+  border-radius: $border-radius;
+}
+
+.tab-content {
+  padding: 1rem;
 }
 </style>
