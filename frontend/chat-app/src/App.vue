@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <input type="text" v-model="userName" />
     <Participants />
     <Chat :messages="messages" @messageSent="sendMessage" />
   </div>
@@ -17,7 +18,8 @@ export default {
   data() {
     return {
       ws: null,
-      messages: []
+      messages: [],
+      userName: ''
     };
   },
 
@@ -37,9 +39,12 @@ export default {
     },
 
     sendMessage(m) {
-      console.log('sending message ', m);
-      this.ws.send(JSON.stringify(m));
-      this.addNewMessage(m);
+      let message = {
+        userName: this.userName,
+        message: m,
+      }
+      this.ws.send(JSON.stringify(message));
+      this.addNewMessage(message);
     }
   },
 
