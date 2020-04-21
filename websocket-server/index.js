@@ -9,7 +9,6 @@ const server = express().listen(3001);
 const wss = new SocketServer({ server });
 
 wss.on('connection', (ws, request, client) => {
-    console.log(JSON.parse(request));
     console.log(`[Server] A client ${client} was connected with request ${request}.`);
 
     ws.on('close', () => console.log('[Server] Client was disconnected.'));
