@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <input type="text" v-model="userName" />
+    <button @click="registerUser">Ok</button>
     <Participants />
     <Chat :messages="messages" @messageSent="sendMessage" />
   </div>
@@ -10,7 +11,7 @@
 import Chat from "./components/Chat";
 import Participants from "./components/Participants";
 
-
+import moment from "moment";
 
 export default {
   name: "App",
@@ -19,7 +20,7 @@ export default {
     return {
       ws: null,
       messages: [],
-      userName: ''
+      userName: ""
     };
   },
 
@@ -41,8 +42,21 @@ export default {
     sendMessage(m) {
       let message = {
         userName: this.userName,
-        message: m,
-      }
+        timeStamp: moment(),
+        message: m
+      };
+      this.ws.send(JSON.stringify(message));
+      this.addNewMessage(message);
+    },
+
+    registerUser() {
+      let message = {
+        userName: 'Meetingbot',
+        timeStamp: moment(),
+        message: `${this.userName} joined`,
+        type: "user-connection"
+      };
+
       this.ws.send(JSON.stringify(message));
       this.addNewMessage(message);
     }
@@ -78,5 +92,11 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+
+$secondary: #545454;
+
+.text-secondary {
+  color: $secondary;
 }
 </style>
