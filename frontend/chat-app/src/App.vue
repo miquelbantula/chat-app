@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <Participants />
-    <Chat :messages="messages" />
+    <Chat :messages="messages" @messageSent="sendMessage" />
   </div>
 </template>
 
@@ -34,6 +34,12 @@ export default {
 
     addNewMessage(m) {
       this.messages = [m, ...this.messages];
+    },
+
+    sendMessage(m) {
+      console.log('sending message ', m);
+      this.ws.send(JSON.stringify(m));
+      this.addNewMessage(m);
     }
   },
 
@@ -47,7 +53,7 @@ export default {
     this.ws.onmessage = e => {
       // got a new message
       console.log("got message ", e);
-      this.addNewMessage(e.data);
+      this.addNewMessage(JSON.parse(e.data));
     };
 
     this.ws.onclose = () => {
