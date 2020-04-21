@@ -1,7 +1,7 @@
 <template>
   <div class="tab-content chat-container">
     <div v-for="(message, i) in messages" :key="i" class="message">
-      <span class="userName">{{ message.userName }}</span>
+      <span class="userName">{{ message.type === 'user-connection' ? 'Meetingbot' : message.userName }}</span>
       <span class="timeStamp">{{ getDate(message.timeStamp) }}</span>
 
       <p class="message" :class="{'text-gray': message.type === 'user-connection'}">{{ message.message }}</p>
