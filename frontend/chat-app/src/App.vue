@@ -9,40 +9,52 @@
 import Chat from "./components/Chat";
 import Participants from "./components/Participants";
 
-const URL = 'ws://localhost:3001';
-const ws = new WebSocket(URL);
+
 
 export default {
   name: "App",
 
   data() {
     return {
-      messages: [],
-    }
+      ws: null,
+      messages: []
+    };
   },
 
   components: {
     Chat,
-    Participants,
+    Participants
   },
 
   methods: {
+    createWebSocket() {
+      const URL = "ws://localhost:3001";
+      this.ws = new WebSocket(URL);
+    },
+
     addNewMessage(m) {
       this.messages = [m, ...this.messages];
     }
   },
 
   mounted() {
-    ws.onopen = () => {
+    this.createWebSocket();
+    this.ws.onopen = () => {
       // connection opened
-      console.log('a client has connected')
-    }
+      console.log("a client has connected");
+    };
 
-    ws.onmessage = e => {
+    this.ws.onmessage = e => {
       // got a new message
-      console.log('got message ', e);
+      console.log("got message ", e);
       this.addNewMessage(e.data);
-    }
+    };
+
+    this.ws.onclose = () => {
+      console.log("a client has disconnected");
+      // create a WebSocket
+      this.createWebSocket();
+    };
   }
 };
 </script>
