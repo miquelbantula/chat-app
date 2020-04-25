@@ -4,7 +4,12 @@
       <span class="userName">{{ message.type === 'user-connection' ? 'Meetingbot' : message.userName }}</span>
       <span class="timeStamp">{{ getDate(message.timeStamp) }}</span>
 
-      <p class="message" :class="{'text-gray': message.type === 'user-connection'}">{{ message.message }}</p>
+      <p class="message" :class="{'text-gray': message.type === 'user-connection'}">
+        {{ message.message }}
+        <span class="text-gray">{{ message.status === 'editted' ? '(editted)' : '' }}</span>
+      </p>
+      <input type="text" :value="message.message" />
+      <button @click="sendEditMessage(message.id, editMessage)">Edit</button>
     </div>
 
     <div class="new-message">
@@ -21,7 +26,8 @@ export default {
 
   data() {
     return {
-      newMessage: ""
+      newMessage: "",
+      editMessage: "",
     };
   },
 
@@ -37,8 +43,12 @@ export default {
       this.newMessage = '';
     },
 
+    sendEditMessage(id, msg) {
+      this.$emit("editMessage", id, msg);
+    },
+
     getDate(d) {
-      return moment(d).format("HH:MM");
+      return moment(d).format("HH:mm");
     }
   }
 };
