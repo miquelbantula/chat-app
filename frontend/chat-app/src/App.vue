@@ -15,17 +15,19 @@
           @click="setActiveTab('chat')"
         >Chat</li>
       </ul>
+      <button @click="editMessage">Edit</button>
     </header>
 
     <div id="wrapper">
       <div v-if="userIsLoggedIn">
         <!--<Participants />-->
-        <Chat :messages="messages" @messageSent="sendMessage" />
+        <Chat :messages="messages" @messageSent="sendMessage" @editMessage="editMessage" />
       </div>
 
       <div v-else>
-        <input type="text" v-model="userName" />
+        <input type="text" v-model="userName" :class="{ 'invalid' : invalidUserName }" />
         <button @click="registerUser">Ok</button>
+        <p v-if="invalidUserName">The user name already exists. Please pick another one.</p>
       </div>
     </div>
   </div>
@@ -45,9 +47,10 @@ export default {
       ws: null,
       messages: [],
       userIsLoggedIn: false,
+      invalidUserName: false,
       userName: "",
       activeTab: "chat",
-      participants: [],
+      participants: []
     };
   },
 
@@ -67,13 +70,15 @@ export default {
     },
 
     addNewMessage(m) {
-      this.messages = [m, ...this.messages];
+      this.messages.push(m);
     },
 
     sendMessage(m) {
       let message = {
         userName: this.userName,
         timeStamp: moment(),
+        id: Date.now(),
+        type: "message",
         message: m
       };
       this.ws.send(JSON.stringify(message));
@@ -89,9 +94,28 @@ export default {
       };
 
       this.ws.send(JSON.stringify(message));
-      this.addNewMessage(message);
-      this.userIsLoggedIn = true;
     },
+
+    editMessage(mId, newMsg) {
+      let message = {
+        type: "edit",
+        userName: this.userName,
+        id: mId,
+        newMessage: newMsg,
+      }
+      this.ws.send(JSON.stringify(message));
+    },
+
+    editExistingMessage(mId, newMessage) {
+      console.log('edit existing message called');
+      let match = this.messages.find(msg => msg.id === mId);
+      console.log('found a match: ', match);
+      if (match) {
+        match.message = newMessage;
+        match.status = 'editted';
+      }
+      return;
+    }
   },
 
   mounted() {
@@ -101,23 +125,78 @@ export default {
       // connection opened
       console.log("a client has connected");
     };
-    
+
     this.ws.onmessage = e => {
       // got a new message
-      console.log("got message ", e);
-      this.addNewMessage(JSON.parse(e.data));
+      let message = JSON.parse(e.data);
+      console.log('message type', message.type);
+
+      switch (message.type) {
+        case 'error':
+          this.invalidUserName = true;
+          break;
+        
+        case 'user-connection':
+          this.userIsLoggedIn = true;
+          break;
+        
+        case 'activeUsers':
+          this.participants = message.users;
+          break;
+        
+        case 'editted':
+          console.log('message', message);
+          this.editExistingMessage(message.id, message.message);
+          break;
+        
+        default:
+          this.addNewMessage(message);
+      }
+      
+      /*if (message.type === "error") {
+        this.invalidUserName = true;
+      } else {
+        console.log('message.type', message.type);
+        this.userIsLoggedIn = true;
+        if (message.type === "activeUsers") {
+          this.participants = message.users;
+        } else {
+          
+          this.addNewMessage(message);
+        }
+      }*/
     };
 
     this.ws.onclose = () => {
       console.log("a client has disconnected");
+
+      let message = {
+        userName: this.userName,
+        timeStamp: moment(),
+        message: `${this.userName} left.`,
+        type: "user-disconnection"
+      };
+
+      this.ws.send(JSON.stringify(message));
+      this.addNewMessage(message);
       // create a WebSocket
       this.createWebSocket();
     };
   },
 
-  destroyed() {
+  beforeDestroy() {
+    console.log("destroyed", this.userName);
     this.ws.onclose = () => {
       console.log("a client has disconnected");
+      let message = {
+        userName: this.userName,
+        timeStamp: moment(),
+        message: `${this.userName} left.`,
+        type: "user-disconnection"
+      };
+
+      this.ws.send(JSON.stringify(message));
+      this.addNewMessage(message);
     };
   }
 };
@@ -205,6 +284,10 @@ input {
   line-height: 1.5;
   border: 1px solid #ced4da;
   border-radius: $border-radius;
+}
+
+input.invalid {
+  border: 1px solid red;
 }
 
 .tab-content {
