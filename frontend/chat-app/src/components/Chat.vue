@@ -1,15 +1,7 @@
 <template>
   <div class="tab-content chat-container">
     <div v-for="(message, i) in messages" :key="i" class="message">
-      <span class="userName">{{ message.type === 'user-connection' ? 'Meetingbot' : message.userName }}</span>
-      <span class="timeStamp">{{ getDate(message.timeStamp) }}</span>
-
-      <p class="message" :class="{'text-gray': message.type === 'user-connection'}">
-        {{ message.message }}
-        <span class="text-gray">{{ message.status === 'editted' ? '(editted)' : '' }}</span>
-      </p>
-      <input type="text" :value="message.message" />
-      <button @click="sendEditMessage(message.id, editMessage)">Edit</button>
+      <ChatMessage :message="message" />
     </div>
 
     <div class="new-message">
@@ -19,7 +11,7 @@
 </template>
 
 <script>
-import moment from "moment";
+import ChatMessage from "@/components/ChatMessage";
 
 export default {
   name: "Chat",
@@ -27,7 +19,6 @@ export default {
   data() {
     return {
       newMessage: "",
-      editMessage: "",
     };
   },
 
@@ -37,19 +28,15 @@ export default {
     }
   },
 
+  components: {
+    ChatMessage,
+  },
+
   methods: {
     sendNewMessage() {
       this.$emit("messageSent", this.newMessage);
       this.newMessage = '';
     },
-
-    sendEditMessage(id, msg) {
-      this.$emit("editMessage", id, msg);
-    },
-
-    getDate(d) {
-      return moment(d).format("HH:mm");
-    }
   }
 };
 </script>
