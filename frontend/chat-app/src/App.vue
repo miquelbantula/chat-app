@@ -139,9 +139,6 @@ export default {
         case 'user-connection':
           this.userIsLoggedIn = true;
           this.addNewMessage(message);
-          break;
-        
-        case 'activeUsers':
           this.participants = message.users;
           break;
         
