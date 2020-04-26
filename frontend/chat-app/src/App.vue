@@ -15,7 +15,6 @@
           @click="setActiveTab('chat')"
         >Chat</li>
       </ul>
-      <button @click="editMessage">Edit</button>
     </header>
 
     <div id="wrapper">
@@ -25,6 +24,7 @@
       </div>
 
       <div v-else>
+        <label>Enter a user name</label>
         <input type="text" v-model="userName" :class="{ 'invalid' : invalidUserName }" />
         <button @click="registerUser">Ok</button>
         <p v-if="invalidUserName">The user name already exists. Please pick another one.</p>
@@ -138,6 +138,7 @@ export default {
         
         case 'user-connection':
           this.userIsLoggedIn = true;
+          this.addNewMessage(message);
           break;
         
         case 'activeUsers':
@@ -217,7 +218,10 @@ html {
   color: #2c3e50;
 }
 
-$border-radius: 0.4rem;
+// margins
+.ml-1 { margin-left: .5rem }
+.mr-1 { margin-right: .5rem }
+.mt-1 { margin-top: .5rem }
 
 .text-gray {
   color: $gray;
@@ -277,7 +281,7 @@ header {
 
 input {
   display: block;
-  height: calc(1.5em + 0.75rem + 2px);
+  min-height: calc(1.5em + 0.75rem + 2px);
   padding: 0.375rem 0.75rem;
   font-size: 1rem;
   font-weight: 400;
@@ -288,6 +292,21 @@ input {
 
 input.invalid {
   border: 1px solid red;
+}
+
+button {
+  display: inline-block;
+  background: $dark;
+  cursor: pointer;
+  color: white;
+  font-weight: 400;
+  text-align: center;
+  vertical-align: middle;
+  border: 1px solid transparent;
+  padding: .375rem .75rem;
+  line-height: 1.5;
+  border-radius: $border-radius;
+  transition: .15s ease-in-out;
 }
 
 .tab-content {
