@@ -93,7 +93,6 @@ wss.on('connection', (ws, request, client) => {
                 users: users
             }
             wss.clients.forEach(function each(client) {
-                console.log('foreach')
                 if (client.readyState === WebSocket.OPEN) {
                     client.send(JSON.stringify(m));
                 }
