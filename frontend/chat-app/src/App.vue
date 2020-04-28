@@ -29,11 +29,13 @@
         />
       </div>
 
-      <div v-else>
-        <label>Enter a user name</label>
-        <input type="text" v-model="userName" :class="{ 'invalid' : invalidUserName }" />
-        <button @click="registerUser">Ok</button>
-        <p v-if="invalidUserName">The user name already exists. Please pick another one.</p>
+      <div v-else class="modal">
+        <div class="modal-inner">
+          <label class="mb-1">Enter a user name</label>
+          <input type="text" v-model="userName" class="mt-1 mb-1" :class="{ 'invalid' : invalidUserName }" />
+          <p v-if="invalidUserName" class="mt-1">The user name already exists. Please pick another one.</p>
+          <button @click="registerUser" class="mt-1 mb-1">Ok</button>
+        </div>
       </div>
     </div>
   </div>
@@ -131,7 +133,7 @@ export default {
 
     deleteExistingMessage(mId) {
       let match = this.messages.find(msg => msg.id === mId);
-      console.log('dound a match: ', match);
+      console.log("dound a match: ", match);
       if (match) {
         match.status = "deleted";
         match.message = "message deleted";
@@ -338,5 +340,28 @@ button {
 
 .tab-content {
   padding: 1rem;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: rgba($dark, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  outline: 0;
+
+  .modal-inner {
+    background: white;
+    padding: 2rem 4rem;
+    border-radius: $border-radius;
+
+    p { max-width: 200px; font-size: .8rem; color: red; }
+  }
 }
 </style>
