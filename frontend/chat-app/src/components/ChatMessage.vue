@@ -23,8 +23,8 @@
             v-if="message.status === 'editted'"
             class="text-gray ml-1"
           >(editted)</span>
-          <button class="edit-icon" @click="editMode = true">Edit</button>
-          <button class="edit-icon" @click="sendRemoveMessage(message.status)">Delete</button>
+          <button v-if="hasOptions" class="edit-icon" @click="editMode = true">Edit</button>
+          <button v-if="hasOptions" class="edit-icon" @click="sendRemoveMessage(message.id)">Delete</button>
         </span>
       </div>
     </div>
@@ -54,6 +54,10 @@ export default {
       set(val) {
         this.editMessage = val;
       }
+    },
+
+    hasOptions() {
+        return (this.message.type !== 'user-connection' && this.message.status !== 'deleted');
     }
   },
 
