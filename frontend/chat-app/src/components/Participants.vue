@@ -1,10 +1,33 @@
 <template>
-    <div>this is participants</div>
+  <div>
+    <ul class="participants">
+      <li v-for="(participant, i) in participants" :key="i">{{ participant }}</li>
+    </ul>
+  </div>
 </template>
 
 <script>
 export default {
-    name: "participants"
-}
+  name: "participants",
+  props: {
+    participants: Array
+  }
+};
 </script>
+
+<style scoped lang="scss">
+@import "../settings.scss";
+
+.participants {
+    list-style: none;
+    text-align: left;
+    padding-left: 0;
+    text-transform: capitalize;
+
+    li {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid $light-gray;
+    }
+}
+</style>
 

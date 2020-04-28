@@ -1,10 +1,12 @@
 <template>
   <div>
     <div>
-      <span
-        class="userName"
-      >{{ message.type === 'user-connection' ? 'Meetingbot' : message.userName }}</span>
-      <span class="timeStamp">{{ getDate(message.timeStamp) }}</span>
+      <div class="message-header">
+        <span
+          class="userName"
+        >{{ message.type === 'user-connection' ? 'Meetingbot' : message.userName }}</span>
+        <span class="timeStamp">{{ getDate(message.timeStamp) }}</span>
+      </div>
 
       <div class="message" :class="{'text-gray': message.type === 'user-connection'}">
         <div v-if="editMode" class="edit-mode">
@@ -17,8 +19,12 @@
         </div>
         <span v-else>
           {{ message.message }}
-          <span v-if="message.status === 'editted'" class="text-gray ml-1">(editted)</span>
+          <span
+            v-if="message.status === 'editted'"
+            class="text-gray ml-1"
+          >(editted)</span>
           <button class="edit-icon" @click="editMode = true">Edit</button>
+          <button class="edit-icon" @click="sendRemoveMessage(message.status)">Delete</button>
         </span>
       </div>
     </div>
@@ -60,7 +66,11 @@ export default {
       let msg = this.editMessage;
       this.$parent.$emit("editMessage", id, msg);
       this.editMode = false;
-      this.editMessage = '';
+      this.editMessage = "";
+    },
+
+    sendRemoveMessage(id) {
+        this.$parent.$emit('removeMessage', id);
     }
   }
 };
@@ -68,6 +78,10 @@ export default {
 
 <style scoped lang="scss">
 @import "./../settings.scss";
+
+.message-header {
+    padding: 0 1rem;
+}
 
 .message {
   border-radius: $border-radius;

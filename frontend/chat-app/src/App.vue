@@ -19,8 +19,14 @@
 
     <div id="wrapper">
       <div v-if="userIsLoggedIn">
-        <!--<Participants />-->
-        <Chat :messages="messages" @messageSent="sendMessage" @editMessage="editMessage" />
+        <Participants v-if="activeTab === 'participants'" :participants="participants" />
+        <Chat
+          v-if="activeTab === 'chat'"
+          :messages="messages"
+          @messageSent="sendMessage"
+          @editMessage="editMessage"
+          @removeMessage="removeMessage"
+        />
       </div>
 
       <div v-else>
@@ -35,7 +41,7 @@
 
 <script>
 import Chat from "./components/Chat";
-//import Participants from "./components/Participants";
+import Participants from "./components/Participants";
 
 import moment from "moment";
 
@@ -55,8 +61,8 @@ export default {
   },
 
   components: {
-    Chat
-    //Participants
+    Chat,
+    Participants
   },
 
   methods: {
@@ -87,9 +93,9 @@ export default {
 
     registerUser() {
       let message = {
+        id: Date.now(),
         userName: this.userName,
         timeStamp: moment(),
-        message: `${this.userName} joined.`,
         type: "user-connection"
       };
 
@@ -101,18 +107,34 @@ export default {
         type: "edit",
         userName: this.userName,
         id: mId,
-        newMessage: newMsg,
-      }
+        newMessage: newMsg
+      };
+      this.ws.send(JSON.stringify(message));
+    },
+
+    removeMessage(mId) {
+      let message = {
+        type: "remove",
+        id: mId
+      };
       this.ws.send(JSON.stringify(message));
     },
 
     editExistingMessage(mId, newMessage) {
-      console.log('edit existing message called');
       let match = this.messages.find(msg => msg.id === mId);
-      console.log('found a match: ', match);
       if (match) {
         match.message = newMessage;
-        match.status = 'editted';
+        match.status = "editted";
+      }
+      return;
+    },
+
+    deleteExistingMessage(mId) {
+      let match = this.messages.find(msg => msg.id === mId);
+      console.log('dound a match: ', match);
+      if (match) {
+        match.status = "deleted";
+        match.message = "message deleted";
       }
       return;
     }
@@ -129,28 +151,31 @@ export default {
     this.ws.onmessage = e => {
       // got a new message
       let message = JSON.parse(e.data);
-      console.log('message type', message.type);
+      console.log("message type", message.type);
 
       switch (message.type) {
-        case 'error':
+        case "error":
           this.invalidUserName = true;
           break;
-        
-        case 'user-connection':
+
+        case "user-connection":
           this.userIsLoggedIn = true;
           this.addNewMessage(message);
           this.participants = message.users;
           break;
-        
-        case 'editted':
-          console.log('message', message);
+
+        case "editted":
           this.editExistingMessage(message.id, message.message);
           break;
-        
+
+        case "deleted":
+          this.deleteExistingMessage(message.id);
+          break;
+
         default:
           this.addNewMessage(message);
       }
-      
+
       /*if (message.type === "error") {
         this.invalidUserName = true;
       } else {
@@ -216,9 +241,15 @@ html {
 }
 
 // margins
-.ml-1 { margin-left: .5rem }
-.mr-1 { margin-right: .5rem }
-.mt-1 { margin-top: .5rem }
+.ml-1 {
+  margin-left: 0.5rem;
+}
+.mr-1 {
+  margin-right: 0.5rem;
+}
+.mt-1 {
+  margin-top: 0.5rem;
+}
 
 .text-gray {
   color: $gray;
@@ -273,7 +304,6 @@ header {
 #wrapper {
   position: relative;
   margin-top: 109px;
-  padding: 1rem;
 }
 
 input {
@@ -300,10 +330,10 @@ button {
   text-align: center;
   vertical-align: middle;
   border: 1px solid transparent;
-  padding: .375rem .75rem;
+  padding: 0.375rem 0.75rem;
   line-height: 1.5;
   border-radius: $border-radius;
-  transition: .15s ease-in-out;
+  transition: 0.15s ease-in-out;
 }
 
 .tab-content {
