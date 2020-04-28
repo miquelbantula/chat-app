@@ -145,7 +145,6 @@ export default {
 
     deleteExistingMessage(mId) {
       let match = this.messages.find(msg => msg.id === mId);
-      console.log("dound a match: ", match);
       if (match) {
         match.status = "deleted";
         match.message = "message deleted";
@@ -165,8 +164,7 @@ export default {
     this.ws.onmessage = e => {
       // got a new message
       let message = JSON.parse(e.data);
-      console.log("message type", message.type);
-
+      
       switch (message.type) {
         case "error":
           this.invalidUserName = true;
@@ -189,19 +187,6 @@ export default {
         default:
           this.addNewMessage(message);
       }
-
-      /*if (message.type === "error") {
-        this.invalidUserName = true;
-      } else {
-        console.log('message.type', message.type);
-        this.userIsLoggedIn = true;
-        if (message.type === "activeUsers") {
-          this.participants = message.users;
-        } else {
-          
-          this.addNewMessage(message);
-        }
-      }*/
     };
 
     this.ws.onclose = () => {
