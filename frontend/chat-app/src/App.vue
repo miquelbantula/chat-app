@@ -30,6 +30,7 @@
           @messageSent="sendMessage"
           @editMessage="editMessage"
           @removeMessage="removeMessage"
+          :userName="userName"
         />
       </div>
 

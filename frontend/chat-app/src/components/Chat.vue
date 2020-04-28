@@ -1,7 +1,7 @@
 <template>
   <div class="tab-content chat-container">
     <div v-for="(message, i) in messages" :key="i" class="message">
-      <ChatMessage :message="message" />
+      <ChatMessage :message="message" :userName="userName" />
     </div>
 
     <div class="new-message">
@@ -25,6 +25,9 @@ export default {
   props: {
     messages: {
       type: Array
+    },
+    userName: {
+      type: String,
     }
   },
 

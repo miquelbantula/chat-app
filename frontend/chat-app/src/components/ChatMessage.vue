@@ -4,7 +4,7 @@
       <div class="message-header">
         <span
           class="userName"
-        >{{ message.type === 'user-connection' ? 'Meetingbot' : message.userName }}</span>
+        >{{ getMessageAuthor }}</span>
         <span class="timeStamp">{{ getDate(message.timeStamp) }}</span>
       </div>
 
@@ -35,7 +35,10 @@ import moment from "moment";
 
 export default {
   props: {
-    message: Object
+    message: Object,
+    userName: {
+        type: String,
+    }
   },
 
   data() {
@@ -53,6 +56,16 @@ export default {
       set(val) {
         this.editMessage = val;
       }
+    },
+
+    getMessageAuthor() {
+        if (this.message.type === 'user-connection') {
+            return 'Meetingbot';
+        }
+        if (this.message.userName === this.userName) {
+            return 'You';
+        }
+        return this.message.userName;
     },
 
     hasOptions() {
