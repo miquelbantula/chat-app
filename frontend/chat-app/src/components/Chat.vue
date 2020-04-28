@@ -1,11 +1,17 @@
 <template>
-  <div class="tab-content chat-container">
+  <div id="chat-container" class="tab-content chat-container">
     <div v-for="(message, i) in messages" :key="i" class="message">
-      <ChatMessage :message="message" :userName="userName" />
+      <ChatMessage :message="message" :userName="userName" @newMessage="scrollChatToBottom" />
     </div>
 
     <div class="new-message">
-      <input type="text" placeholder="Message" autofocus v-model="newMessage" @keyup.enter="sendNewMessage" />
+      <input
+        type="text"
+        placeholder="Message"
+        autofocus
+        v-model="newMessage"
+        @keyup.enter="sendNewMessage"
+      />
     </div>
   </div>
 </template>
@@ -18,7 +24,7 @@ export default {
 
   data() {
     return {
-      newMessage: "",
+      newMessage: ""
     };
   },
 
@@ -27,19 +33,28 @@ export default {
       type: Array
     },
     userName: {
-      type: String,
+      type: String
     }
   },
 
   components: {
-    ChatMessage,
+    ChatMessage
   },
 
   methods: {
     sendNewMessage() {
       this.$emit("messageSent", this.newMessage);
-      this.newMessage = '';
+      this.newMessage = "";
+      // we make sure the DOM has updated
+      this.$nextTick(() => {
+        this.scrollChatToBottom();
+      });
     },
+
+    scrollChatToBottom() {
+      let el = document.getElementById("app");
+      window.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+    }
   }
 };
 </script>
@@ -47,11 +62,16 @@ export default {
 <style lang="scss">
 @import "../settings.scss";
 
+#chat-container {
+  width: 100%;
+  overflow-y: scroll;
+}
+
 .message {
   text-align: left;
-  padding: .5rem 0;
-  margin: .5rem 0;
-  
+  padding: 0.5rem 0;
+  margin: 0.5rem 0;
+
   .userName {
     font-weight: bold;
   }
