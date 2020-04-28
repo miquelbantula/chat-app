@@ -36,7 +36,12 @@ wss.on('connection', (ws, request, client) => {
                     message: `${data.userName} joined`,
                     users: users
                 }
-                ws.send(JSON.stringify(m));
+                wss.clients.forEach(function each(client) {
+                    console.log('foreach')
+                    if (client.readyState === WebSocket.OPEN) {
+                        client.send(JSON.stringify(m));
+                    }
+                });
             }
         }
 
@@ -45,7 +50,11 @@ wss.on('connection', (ws, request, client) => {
             if (match) {
                 match.message = data.newMessage;
                 match.type = 'editted';
-                ws.send(JSON.stringify(match));
+                wss.clients.forEach(function each(client) {
+                    if (client.readyState === WebSocket.OPEN) {
+                        client.send(JSON.stringify(match));
+                    }
+                });
             } else {
                 console.error('could not find the message to be editted');
             }
@@ -56,7 +65,11 @@ wss.on('connection', (ws, request, client) => {
             if (match) {
                 match.message = 'message deleted';
                 match.type = 'deleted';
-                ws.send(JSON.stringify(match));
+                wss.clients.forEach(function each(client) {
+                    if (client.readyState === WebSocket.OPEN) {
+                        client.send(JSON.stringify(match));
+                    }
+                });
             } else {
                 console.error('could not find the message to be editted');
             }
@@ -68,7 +81,7 @@ wss.on('connection', (ws, request, client) => {
 
 
         if (data.type === 'message') {
-            // we broadcast the message
+            // we broadcast the message to everyone except ourselves
             wss.clients.forEach(function each(client) {
                 if (client !== ws && client.readyState === WebSocket.OPEN) {
                     client.send(JSON.stringify(data));
