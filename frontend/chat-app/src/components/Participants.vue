@@ -19,6 +19,7 @@ export default {
 @import "../settings.scss";
 
 .participants {
+    width: 100%;
     list-style: none;
     text-align: left;
     padding-left: 0;

@@ -18,8 +18,12 @@
     </header>
 
     <div id="wrapper">
-      <div v-if="userIsLoggedIn">
-        <Participants v-if="activeTab === 'participants'" :participants="participants" />
+      <div v-if="userIsLoggedIn" class="flex-content">
+        <Participants
+          id="participants"
+          v-show="activeTab === 'participants'"
+          :participants="participants"
+        />
         <Chat
           v-if="activeTab === 'chat'"
           :messages="messages"
@@ -32,8 +36,16 @@
       <div v-else class="modal">
         <div class="modal-inner">
           <label class="mb-1">Enter a user name</label>
-          <input type="text" v-model="userName" class="mt-1 mb-1" :class="{ 'invalid' : invalidUserName }" />
-          <p v-if="invalidUserName" class="mt-1">The user name already exists. Please pick another one.</p>
+          <input
+            type="text"
+            v-model="userName"
+            class="mt-1 mb-1"
+            :class="{ 'invalid' : invalidUserName }"
+          />
+          <p
+            v-if="invalidUserName"
+            class="mt-1"
+          >The user name already exists. Please pick another one.</p>
           <button @click="registerUser" class="mt-1 mb-1">Ok</button>
         </div>
       </div>
@@ -194,35 +206,19 @@ export default {
 
     this.ws.onclose = () => {
       console.log("a client has disconnected");
-
-      let message = {
-        userName: this.userName,
-        timeStamp: moment(),
-        message: `${this.userName} left.`,
-        type: "user-disconnection"
-      };
-
-      this.ws.send(JSON.stringify(message));
-      this.addNewMessage(message);
-      // create a WebSocket
-      this.createWebSocket();
     };
   },
 
   beforeDestroy() {
-    console.log("destroyed", this.userName);
-    this.ws.onclose = () => {
-      console.log("a client has disconnected");
-      let message = {
-        userName: this.userName,
-        timeStamp: moment(),
-        message: `${this.userName} left.`,
-        type: "user-disconnection"
-      };
-
-      this.ws.send(JSON.stringify(message));
-      this.addNewMessage(message);
+    let message = {
+      userName: this.userName,
+      timeStamp: moment(),
+      type: "user-disconnection"
     };
+
+    this.ws.send(JSON.stringify(message));
+    this.addNewMessage(message);
+    // create a WebSocket
   }
 };
 </script>
@@ -303,6 +299,40 @@ header {
   }
 }
 
+@media screen and (min-width: 720px) {
+  #wrapper {
+    margin-top: 54px !important;
+  }
+
+  .tabs {
+    display: none;
+  }
+  .flex-content {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  #participants {
+    display: flex !important;
+    position: fixed;
+    width: 220px;
+    flex-basis: 0;
+    flex-grow: 1;
+    max-width: 220px;
+    border-right: 1px solid $light-gray;
+    height: 100vh;
+  }
+  .chat-container {
+    display: block !important;
+    margin-left: 220px;
+
+    .new-message {
+      margin-left: 220px;
+      width: calc(100% - 2rem - 220px);
+    }
+  }
+}
+
 #wrapper {
   position: relative;
   margin-top: 109px;
@@ -361,7 +391,11 @@ button {
     padding: 2rem 4rem;
     border-radius: $border-radius;
 
-    p { max-width: 200px; font-size: .8rem; color: red; }
+    p {
+      max-width: 200px;
+      font-size: 0.8rem;
+      color: red;
+    }
   }
 }
 </style>
