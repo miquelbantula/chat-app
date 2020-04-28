@@ -42,12 +42,20 @@ wss.on('connection', (ws, request, client) => {
 
         if (data.type === 'edit') {
             let match = messages.find(message => message.id === data.id);
-            console.log('match', match);
-            console.log('message', message);
             if (match) {
                 match.message = data.newMessage;
                 match.type = 'editted';
-                console.log('match2', match);
+                ws.send(JSON.stringify(match));
+            } else {
+                console.error('could not find the message to be editted');
+            }
+        }
+
+        if (data.type === 'remove') {
+            let match = messages.find(message => message.id === data.id);
+            if (match) {
+                match.message = 'message deleted';
+                match.type = 'deleted';
                 ws.send(JSON.stringify(match));
             } else {
                 console.error('could not find the message to be editted');
