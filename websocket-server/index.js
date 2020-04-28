@@ -13,14 +13,25 @@ const messages = [];
 wss.on('connection', (ws, request, client) => {
     console.log(`[Server] A client ${client} was connected with request ${request}.`);
 
-    ws.on('close', () => console.log('[Server] Client was disconnected.'));
+    ws.on('close', (message) => {
+        const data = JSON.parse(message);
+        console.log('[Server] Client was disconnected.', data);
+        users.splice(message.userName);
+        let m = {
+            type: 'user-connection',
+            message: `${data.userName} left`,
+            users: users
+        }
+        wss.clients.forEach(function each(client) {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify(m));
+            }
+        });
+    });
 
     ws.on('message', (message) => {
         const data = JSON.parse(message);
-
-
         messages.push(data);
-        console.log('messages', messages);
 
         if (data.type === 'user-connection') {
             if (users.includes(data.userName)) {
@@ -37,7 +48,6 @@ wss.on('connection', (ws, request, client) => {
                     users: users
                 }
                 wss.clients.forEach(function each(client) {
-                    console.log('foreach')
                     if (client.readyState === WebSocket.OPEN) {
                         client.send(JSON.stringify(m));
                     }
@@ -76,7 +86,18 @@ wss.on('connection', (ws, request, client) => {
         }
 
         if (data.type === 'user-disconnection') {
-
+            users.splice(message.userName);
+            let m = {
+                type: 'user-connection',
+                message: `${data.userName} left`,
+                users: users
+            }
+            wss.clients.forEach(function each(client) {
+                console.log('foreach')
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify(m));
+                }
+            });
         }
 
 
