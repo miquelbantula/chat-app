@@ -10,7 +10,6 @@
 
       <div class="message" :class="{'text-gray': message.type === 'user-connection'}">
         <div v-if="editMode" class="edit-mode">
-          {{ editMessage }}
           <input class="edit-input" type="text" v-model="editMessage" />
           <div class="mt-1">
             <button @click="editMode = false" class="mr-1">Cancel</button>
